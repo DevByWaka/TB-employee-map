@@ -158,77 +158,77 @@ async function doDeleteNode() {
 
 <template>
   <Teleport to="body">
-    <div class="em-modal-bg em-root" @click.self="emit('close')">
-      <div class="em-modal" style="max-width: 580px;">
-        <div class="em-modal-header">
-          <div class="em-modal-title">{{ title }}</div>
+    <div class="modal-bg app-root" @click.self="emit('close')">
+      <div class="modal" style="max-width: 580px;">
+        <div class="modal-header">
+          <div class="modal-title">{{ title }}</div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <button v-if="canEdit" class="em-btn em-mode-btn" :class="editMode ? 'em-mode-edit' : 'em-mode-view'" @click="editMode = !editMode">
+            <button v-if="canEdit" class="btn btn btn-sm" :class="editMode ? 'em-mode-edit' : 'em-mode-view'" @click="editMode = !editMode">
               {{ editMode ? '👁 表示' : '✏️ 編集' }}
             </button>
-            <button class="em-modal-close" @click="emit('close')">×</button>
+            <button class="modal-close" @click="emit('close')">×</button>
           </div>
         </div>
 
-        <div class="em-modal-body" v-if="node">
+        <div class="modal-body" v-if="node">
 
           <!-- ═══ 表示モード ═══ -->
           <template v-if="!editMode">
-            <div class="em-view-title">基本情報</div>
-            <div class="em-info-grid">
-              <div class="em-info-item"><div class="em-info-label">名前</div><div class="em-info-value">{{ node.label }}</div></div>
-              <div class="em-info-item"><div class="em-info-label">タイプ</div><div class="em-info-value">{{ node.group === 'employee' ? '従業員' : node.group === 'manager' ? '担当者' : '現場' }}</div></div>
-              <div v-if="node.group !== 'site'" class="em-info-item">
-                <div class="em-info-label">社員ID</div>
-                <div class="em-info-value" :class="{ empty: !node.employeeId }">{{ node.employeeId || '未入力' }}</div>
+            <div class="view-title">基本情報</div>
+            <div class="info-grid">
+              <div class="info-item"><div class="info-label">名前</div><div class="info-value">{{ node.label }}</div></div>
+              <div class="info-item"><div class="info-label">タイプ</div><div class="info-value">{{ node.group === 'employee' ? '従業員' : node.group === 'manager' ? '担当者' : '現場' }}</div></div>
+              <div v-if="node.group !== 'site'" class="info-item">
+                <div class="info-label">社員ID</div>
+                <div class="info-value" :class="{ empty: !node.employeeId }">{{ node.employeeId || '未入力' }}</div>
               </div>
             </div>
 
             <!-- 従業員情報 -->
             <template v-if="node.group === 'employee'">
-              <hr class="em-divider">
-              <div class="em-view-title">従業員情報</div>
-              <div class="em-info-grid">
-                <div class="em-info-item"><div class="em-info-label">生年月日</div><div class="em-info-value" :class="{ empty: !node.birthdate }">{{ node.birthdate || '未入力' }}</div></div>
-                <div class="em-info-item"><div class="em-info-label">年齢</div><div class="em-info-value" :class="{ empty: calcAge(node.birthdate) === null }">{{ calcAge(node.birthdate) !== null ? calcAge(node.birthdate) + '歳' : '未入力' }}</div></div>
-                <div class="em-info-item"><div class="em-info-label">性別</div><div class="em-info-value" :class="{ empty: !node.gender }">{{ node.gender || '未入力' }}</div></div>
-                <div class="em-info-item"><div class="em-info-label">交通手段</div><div class="em-info-value" :class="{ empty: !node.transport }">{{ node.transport || '未入力' }}</div></div>
-                <div class="em-info-item full">
-                  <div class="em-info-label">電話番号</div>
-                  <div v-if="parsePhones(node.phone).length"><div v-for="p in parsePhones(node.phone)" :key="p" class="em-info-value">{{ p }}</div></div>
-                  <div v-else class="em-info-value empty">未入力</div>
+              <hr class="divider">
+              <div class="view-title">従業員情報</div>
+              <div class="info-grid">
+                <div class="info-item"><div class="info-label">生年月日</div><div class="info-value" :class="{ empty: !node.birthdate }">{{ node.birthdate || '未入力' }}</div></div>
+                <div class="info-item"><div class="info-label">年齢</div><div class="info-value" :class="{ empty: calcAge(node.birthdate) === null }">{{ calcAge(node.birthdate) !== null ? calcAge(node.birthdate) + '歳' : '未入力' }}</div></div>
+                <div class="info-item"><div class="info-label">性別</div><div class="info-value" :class="{ empty: !node.gender }">{{ node.gender || '未入力' }}</div></div>
+                <div class="info-item"><div class="info-label">交通手段</div><div class="info-value" :class="{ empty: !node.transport }">{{ node.transport || '未入力' }}</div></div>
+                <div class="info-item full">
+                  <div class="info-label">電話番号</div>
+                  <div v-if="parsePhones(node.phone).length"><div v-for="p in parsePhones(node.phone)" :key="p" class="info-value">{{ p }}</div></div>
+                  <div v-else class="info-value empty">未入力</div>
                 </div>
-                <div class="em-info-item full"><div class="em-info-label">メール</div><div class="em-info-value" :class="{ empty: !node.email }">{{ node.email || '未入力' }}</div></div>
-                <div class="em-info-item full"><div class="em-info-label">メモ</div><div class="em-info-value" :class="{ empty: !node.notes }">{{ node.notes || '未入力' }}</div></div>
+                <div class="info-item full"><div class="info-label">メール</div><div class="info-value" :class="{ empty: !node.email }">{{ node.email || '未入力' }}</div></div>
+                <div class="info-item full"><div class="info-label">メモ</div><div class="info-value" :class="{ empty: !node.notes }">{{ node.notes || '未入力' }}</div></div>
               </div>
-              <hr class="em-divider">
-              <div class="em-view-title" style="color: #fb923c;">🏠 所属現場</div>
-              <div v-if="!empHomeSites.length" class="em-no-assign">所属現場なし</div>
-              <div v-for="s in empHomeSites" :key="s.edgeId" class="em-assign-item">
+              <hr class="divider">
+              <div class="view-title" style="color: #fb923c;">🏠 所属現場</div>
+              <div v-if="!empHomeSites.length" class="no-assign">所属現場なし</div>
+              <div v-for="s in empHomeSites" :key="s.edgeId" class="assign-item">
                 <div style="flex: 1;">
-                  <div class="em-assign-name">{{ s.label }}</div>
+                  <div class="assign-name">{{ s.label }}</div>
                   <template v-for="(sl, i) in s.slots.filter(sl => sl.days.length)" :key="i">
-                    <div class="em-day-badges"><span v-for="d in sl.days" :key="d" class="em-day-badge">{{ d }}</span></div>
-                    <div class="em-slot-time">{{ sl.startTime }} – {{ sl.endTime }}</div>
-                    <div v-if="sl.memo" class="em-slot-memo">{{ sl.memo }}</div>
+                    <div class="day-badges"><span v-for="d in sl.days" :key="d" class="day-badge">{{ d }}</span></div>
+                    <div class="slot-time">{{ sl.startTime }} – {{ sl.endTime }}</div>
+                    <div v-if="sl.memo" class="slot-memo">{{ sl.memo }}</div>
                   </template>
                 </div>
               </div>
-              <div class="em-view-title" style="color: #60a5fa;">🤝 応援現場</div>
-              <div v-if="!empSupportSites.length" class="em-no-assign">応援現場なし</div>
-              <div v-for="s in empSupportSites" :key="s.edgeId" class="em-assign-item">
-                <span class="em-assign-name">{{ s.label }}</span>
+              <div class="view-title" style="color: #60a5fa;">🤝 応援現場</div>
+              <div v-if="!empSupportSites.length" class="no-assign">応援現場なし</div>
+              <div v-for="s in empSupportSites" :key="s.edgeId" class="assign-item">
+                <span class="assign-name">{{ s.label }}</span>
               </div>
             </template>
 
             <!-- 現場配置 -->
             <template v-if="node.group === 'site'">
-              <hr class="em-divider">
-              <div class="em-view-title">配置状況</div>
-              <div v-if="!siteAssignments.length" class="em-no-assign">配置なし</div>
-              <div v-for="a in siteAssignments" :key="a.edgeId" class="em-assign-item">
+              <hr class="divider">
+              <div class="view-title">配置状況</div>
+              <div v-if="!siteAssignments.length" class="no-assign">配置なし</div>
+              <div v-for="a in siteAssignments" :key="a.edgeId" class="assign-item">
                 <div style="flex: 1;">
-                  <span class="em-assign-name">{{ a.label }}</span>
+                  <span class="assign-name">{{ a.label }}</span>
                   <span :style="{ color: a.isHome ? '#60a5fa' : '#fb923c', fontSize: '11px', marginLeft: '8px' }">{{ a.isHome ? '🏠 所属' : '🤝 応援' }}</span>
                   <div v-if="a.info" style="font-size: 11px; color: var(--em-muted); margin-top: 2px;">{{ a.info }}</div>
                 </div>
@@ -237,81 +237,81 @@ async function doDeleteNode() {
 
             <!-- 担当者 -->
             <template v-if="node.group === 'manager'">
-              <hr class="em-divider">
-              <div class="em-view-title">担当従業員</div>
-              <div v-if="!managerEmployees.length" class="em-no-assign">担当従業員なし</div>
-              <div v-for="e in managerEmployees" :key="e.id" class="em-assign-item">
+              <hr class="divider">
+              <div class="view-title">担当従業員</div>
+              <div v-if="!managerEmployees.length" class="no-assign">担当従業員なし</div>
+              <div v-for="e in managerEmployees" :key="e.id" class="assign-item">
                 <div style="flex: 1;">
-                  <div class="em-assign-name">👤 {{ e.label }}</div>
+                  <div class="assign-name">👤 {{ e.label }}</div>
                   <div v-if="e.info" style="font-size: 11px; color: var(--em-muted);">{{ e.info }}</div>
                   <div v-if="e.homeNames.length" style="font-size: 11px; color: #60a5fa; margin-top: 2px;">🏠 {{ e.homeNames.join('、') }}</div>
                 </div>
               </div>
-              <hr class="em-divider">
-              <div class="em-view-title">担当現場</div>
-              <div v-if="!managerSites.length" class="em-no-assign">担当現場なし</div>
-              <div v-for="s in managerSites" :key="s.id" class="em-assign-item"><span class="em-assign-name">🏗 {{ s.label }}</span></div>
+              <hr class="divider">
+              <div class="view-title">担当現場</div>
+              <div v-if="!managerSites.length" class="no-assign">担当現場なし</div>
+              <div v-for="s in managerSites" :key="s.id" class="assign-item"><span class="assign-name">🏗 {{ s.label }}</span></div>
             </template>
           </template>
 
           <!-- ═══ 編集モード ═══ -->
           <template v-else>
-            <div class="em-view-title">基本情報</div>
-            <div class="em-form-group"><label class="em-label">名前</label><input class="em-input" v-model="form.label"></div>
-            <div v-if="node.group !== 'site'" class="em-form-group"><label class="em-label">社員ID</label><input class="em-input" v-model="form.employeeId"></div>
-            <button class="em-btn em-btn-warning" @click="saveBasic">基本情報を変更</button>
+            <div class="view-title">基本情報</div>
+            <div class="form-group"><label class="label">名前</label><input class="input" v-model="form.label"></div>
+            <div v-if="node.group !== 'site'" class="form-group"><label class="label">社員ID</label><input class="input" v-model="form.employeeId"></div>
+            <button class="btn btn-warn" @click="saveBasic">基本情報を変更</button>
 
             <!-- 従業員情報編集 -->
             <template v-if="node.group === 'employee'">
-              <hr class="em-divider">
-              <div class="em-view-title">従業員情報</div>
+              <hr class="divider">
+              <div class="view-title">従業員情報</div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="em-form-group"><label class="em-label">生年月日</label><input type="date" class="em-input" v-model="form.birthdate"></div>
-                <div class="em-form-group">
-                  <label class="em-label">性別</label>
-                  <select class="em-select" v-model="form.gender">
+                <div class="form-group"><label class="label">生年月日</label><input type="date" class="input" v-model="form.birthdate"></div>
+                <div class="form-group">
+                  <label class="label">性別</label>
+                  <select class="select" v-model="form.gender">
                     <option value="">選択</option>
                     <option>男性</option><option>女性</option><option>その他</option><option>未記入</option>
                   </select>
                 </div>
               </div>
-              <div class="em-form-group">
-                <label class="em-label">交通手段</label>
-                <select class="em-select" v-model="form.transport">
+              <div class="form-group">
+                <label class="label">交通手段</label>
+                <select class="select" v-model="form.transport">
                   <option value="">選択</option>
                   <option>徒歩</option><option>自転車</option><option>バイク</option><option>自動車</option><option>電車</option><option>バス</option><option>その他</option>
                 </select>
               </div>
-              <div class="em-form-group">
-                <label class="em-label">電話番号</label>
+              <div class="form-group">
+                <label class="label">電話番号</label>
                 <div v-for="(_, i) in form.phones" :key="i" style="display: flex; gap: 6px; margin-bottom: 6px;">
-                  <input type="tel" class="em-input" v-model="form.phones[i]" style="flex: 1; margin: 0;" placeholder="">
-                  <button class="em-btn em-btn-danger em-btn-sm" @click="form.phones.splice(i, 1)" style="margin: 0; padding: 4px 8px;">✕</button>
+                  <input type="tel" class="input" v-model="form.phones[i]" style="flex: 1; margin: 0;" placeholder="">
+                  <button class="btn btn-danger btn-sm" @click="form.phones.splice(i, 1)" style="margin: 0; padding: 4px 8px;">✕</button>
                 </div>
-                <button class="em-btn" @click="form.phones.push('')" style="margin-top: 4px; padding: 6px; font-size: 12px;">＋ 番号を追加</button>
+                <button class="btn" @click="form.phones.push('')" style="margin-top: 4px; padding: 6px; font-size: 12px;">＋ 番号を追加</button>
               </div>
-              <div class="em-form-group"><label class="em-label">メール</label><input type="email" class="em-input" v-model="form.email"></div>
-              <div class="em-form-group"><label class="em-label">メモ</label><textarea class="em-textarea" v-model="form.notes" style="min-height: 60px;"></textarea></div>
-              <button class="em-btn em-btn-warning" @click="saveEmployee">従業員情報を保存</button>
+              <div class="form-group"><label class="label">メール</label><input type="email" class="input" v-model="form.email"></div>
+              <div class="form-group"><label class="label">メモ</label><textarea class="textarea" v-model="form.notes" style="min-height: 60px;"></textarea></div>
+              <button class="btn btn-warn" @click="saveEmployee">従業員情報を保存</button>
 
-              <hr class="em-divider">
-              <div class="em-view-title">配置の管理</div>
-              <div v-if="!editAssignments.length" class="em-no-assign">配置なし</div>
-              <div v-for="a in editAssignments" :key="a.edgeId" class="em-assign-item">
+              <hr class="divider">
+              <div class="view-title">配置の管理</div>
+              <div v-if="!editAssignments.length" class="no-assign">配置なし</div>
+              <div v-for="a in editAssignments" :key="a.edgeId" class="assign-item">
                 <div style="flex: 1;">
-                  <span class="em-assign-name">{{ a.label }}</span>
+                  <span class="assign-name">{{ a.label }}</span>
                   <span :style="{ color: a.isHome ? '#60a5fa' : '#fb923c', fontSize: '11px', marginLeft: '6px' }">{{ a.isHome ? '🏠 所属' : '🤝 応援' }}</span>
                 </div>
-                <button class="em-assign-del" @click="store.removeAssignment(a.edgeId)">削除</button>
+                <button class="assign-del" @click="store.removeAssignment(a.edgeId)">削除</button>
               </div>
-              <div class="em-form-group" style="margin-top: 12px;"><label class="em-label">現場を追加</label>
-                <select class="em-select" v-model="form.addSiteId">
+              <div class="form-group" style="margin-top: 12px;"><label class="label">現場を追加</label>
+                <select class="select" v-model="form.addSiteId">
                   <option value="">選択</option>
                   <option v-for="s in availableSites" :key="s.id" :value="s.id">{{ s.label }}</option>
                 </select>
               </div>
-              <div class="em-form-group">
-                <label class="em-label">配置種別</label>
+              <div class="form-group">
+                <label class="label">配置種別</label>
                 <div style="display: flex; gap: 16px; padding: 6px 0;">
                   <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px;">
                     <input type="radio" v-model="form.assignType" value="home" style="width: auto;"> <span style="color: #fb923c;">🏠 所属現場</span>
@@ -321,35 +321,35 @@ async function doDeleteNode() {
                   </label>
                 </div>
               </div>
-              <button class="em-btn" @click="doAddAssignment">配置を追加</button>
+              <button class="btn" @click="doAddAssignment">配置を追加</button>
             </template>
 
             <!-- 担当者の従業員管理 -->
             <template v-if="node.group === 'manager'">
-              <hr class="em-divider">
-              <div class="em-view-title">担当従業員の管理</div>
-              <div v-if="!editManagerEmps.length" class="em-no-assign">担当従業員なし</div>
-              <div v-for="e in editManagerEmps" :key="e.edgeId" class="em-assign-item">
-                <div style="flex: 1;"><span class="em-assign-name">👤 {{ e.label }}</span></div>
-                <button class="em-assign-del" @click="store.removeManagerEmployee(e.edgeId)">削除</button>
+              <hr class="divider">
+              <div class="view-title">担当従業員の管理</div>
+              <div v-if="!editManagerEmps.length" class="no-assign">担当従業員なし</div>
+              <div v-for="e in editManagerEmps" :key="e.edgeId" class="assign-item">
+                <div style="flex: 1;"><span class="assign-name">👤 {{ e.label }}</span></div>
+                <button class="assign-del" @click="store.removeManagerEmployee(e.edgeId)">削除</button>
               </div>
-              <div class="em-form-group" style="margin-top: 12px;"><label class="em-label">従業員を追加</label>
-                <select class="em-select" v-model="form.addEmpId">
+              <div class="form-group" style="margin-top: 12px;"><label class="label">従業員を追加</label>
+                <select class="select" v-model="form.addEmpId">
                   <option value="">選択</option>
                   <option v-for="e in availableEmps" :key="e.id" :value="e.id">{{ e.label }}</option>
                 </select>
               </div>
-              <button class="em-btn" @click="doAddManagerEmp">担当従業員を追加</button>
+              <button class="btn" @click="doAddManagerEmp">担当従業員を追加</button>
             </template>
 
             <!-- 現場の配置（読み取り専用） -->
             <template v-if="node.group === 'site'">
-              <hr class="em-divider">
-              <div class="em-view-title">配置の管理</div>
-              <div v-if="!siteAssignments.length" class="em-no-assign">配置なし</div>
-              <div v-for="a in siteAssignments" :key="a.edgeId" class="em-assign-item">
+              <hr class="divider">
+              <div class="view-title">配置の管理</div>
+              <div v-if="!siteAssignments.length" class="no-assign">配置なし</div>
+              <div v-for="a in siteAssignments" :key="a.edgeId" class="assign-item">
                 <div style="flex: 1;">
-                  <span class="em-assign-name">{{ a.label }}</span>
+                  <span class="assign-name">{{ a.label }}</span>
                   <span :style="{ color: a.isHome ? '#60a5fa' : '#fb923c', fontSize: '11px', marginLeft: '8px' }">{{ a.isHome ? '🏠 所属' : '🤝 応援' }}</span>
                 </div>
               </div>
@@ -357,9 +357,9 @@ async function doDeleteNode() {
           </template>
         </div>
 
-        <div class="em-modal-actions">
-          <button v-if="editMode && store.isAdmin" class="em-btn em-btn-danger" @click="doDeleteNode" style="margin-right: auto;">🗑️ このノードを削除</button>
-          <button class="em-btn em-btn-secondary" @click="emit('close')">閉じる</button>
+        <div class="modal-footer">
+          <button v-if="editMode && store.isAdmin" class="btn btn-danger" @click="doDeleteNode" style="margin-right: auto;">🗑️ このノードを削除</button>
+          <button class="btn btn-red" @click="emit('close')">閉じる</button>
         </div>
       </div>
     </div>

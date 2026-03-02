@@ -7,18 +7,16 @@ const container = ref(null)
 const emit = defineEmits(['nodeClick', 'edgeClick', 'ready'])
 
 let network = null
-let _nodes = null
-let _edges = null
 
-onMounted(async () => {
+onMounted(() => {
   const vis = window.vis
+  const nodes = new vis.DataSet([])
+  const edges = new vis.DataSet([])
 
-  _nodes = new vis.DataSet([])
-  _edges = new vis.DataSet([])
+  // ストアのモジュール変数に注入（シングルトン確定）
+  store.injectDataSets(nodes, edges)
 
-  store.injectDataSets(_nodes, _edges)
-
-  const options = {
+  network = new vis.Network(container.value, { nodes, edges }, {
     nodes: {
       shape: 'dot', size: 25,
       font: { size: 14, color: '#f3f4f6', face: 'Noto Sans JP' },
@@ -41,42 +39,33 @@ onMounted(async () => {
       stabilization: { enabled: true, iterations: 100 },
     },
     interaction: { hover: true, tooltipDelay: 100, dragNodes: true, dragView: true, zoomView: true },
-  }
+  })
 
-  network = new vis.Network(container.value, { nodes: _nodes, edges: _edges }, options)
-
-  network.on('click', (params) => {
+  network.on('click', params => {
     if (params.nodes.length > 0) emit('nodeClick', params.nodes[0])
     else if (params.edges.length > 0) emit('edgeClick', params.edges[0])
   })
 
+  // DataSet注入完了を通知 → MapViewがloadFromDbを呼ぶ
   emit('ready')
 
-  document.addEventListener('visibilitychange', onVisibilityChange)
+  document.addEventListener('visibilitychange', onVisChange)
   window.addEventListener('online', onOnline)
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('visibilitychange', onVisibilityChange)
+  document.removeEventListener('visibilitychange', onVisChange)
   window.removeEventListener('online', onOnline)
-  if (network) network.destroy()
+  network?.destroy()
 })
 
-async function onVisibilityChange() {
+async function onVisChange() {
   if (document.visibilityState === 'visible' && store.dbConnected) {
-    await store.loadFromDb(true)
-    store.subscribeRealtime()
-    store.startPolling(5000)
-  } else {
-    store.stopPolling()
-  }
+    await store.loadFromDb(true); store.subscribeRealtime(); store.startPolling(5000)
+  } else { store.stopPolling() }
 }
 async function onOnline() {
-  if (store.dbConnected) {
-    await store.loadFromDb(true)
-    store.subscribeRealtime()
-    store.startPolling(5000)
-  }
+  if (store.dbConnected) { await store.loadFromDb(true); store.subscribeRealtime(); store.startPolling(5000) }
 }
 
 function focusNode(nodeId) {
@@ -84,13 +73,9 @@ function focusNode(nodeId) {
   network?.selectNodes([nodeId])
 }
 
-// DataSet を外部に公開
-function getNodes() { return _nodes }
-function getEdges() { return _edges }
-
-defineExpose({ focusNode, getNodes, getEdges })
+defineExpose({ focusNode })
 </script>
 
 <template>
-  <div ref="container" class="em-network" />
+  <div ref="container" class="network-canvas" />
 </template>

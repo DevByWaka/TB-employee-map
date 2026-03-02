@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { useEmployeeMapStore } from '@/stores/employeeMap'
+import { useEmployeeMapStore, getEdges } from '@/stores/employeeMap'
 
 import LoginOverlay    from '@/components/LoginOverlay.vue'
 import NetworkGraph    from '@/components/NetworkGraph.vue'
@@ -16,37 +16,24 @@ const store       = useEmployeeMapStore()
 const networkRef  = ref(null)
 const sidebarOpen = ref(true)
 
-const activeNodeId       = ref(null)
-const activeEdgeId       = ref(null)
-const activeCustomerEdge = ref(null)
-const showSettings       = ref(false)
-const showAdmin          = ref(false)
-const showAddManager     = ref(false)
+const activeNode     = ref(null)
+const activeEdge     = ref(null)
+const activeCustomer = ref(null)
+const showSettings   = ref(false)
+const showAdmin      = ref(false)
+const showAddMgr     = ref(false)
 
-function onNodeClick(nodeId) {
-  const node = store.getNodes()?.get(nodeId)
-  if (!node) return
-  activeEdgeId.value = null
-  activeCustomerEdge.value = null
-  activeNodeId.value = nodeId
+function onNodeClick(id) {
+  activeEdge.value = null; activeCustomer.value = null; activeNode.value = id
 }
-
-function onEdgeClick(edgeId) {
-  const edge = store.getEdges()?.get(edgeId)
+function onEdgeClick(id) {
+  activeNode.value = null; activeCustomer.value = null; activeEdge.value = null
+  const edge = getEdges()?.get(id)
   if (!edge) return
-  activeNodeId.value = null
-  activeCustomerEdge.value = null
-  if (edge.edgeType === 'manager-site') {
-    activeCustomerEdge.value = edgeId
-  } else if (edge.edgeType !== 'manages') {
-    activeEdgeId.value = edgeId
-  }
+  if (edge.edgeType === 'manager-site') activeCustomer.value = id
+  else if (edge.edgeType !== 'manages') activeEdge.value = id
 }
 
-// ログイン完了 → グラフはこの後マウントされるので何もしない
-function onLoggedIn() {}
-
-// NetworkGraph の onMounted 完了後（DataSet注入済み）に呼ばれる
 async function onGraphReady() {
   if (store.dbConnected) {
     await store.loadFromDb()
@@ -57,21 +44,22 @@ async function onGraphReady() {
 </script>
 
 <template>
-  <div class="em-root" style="height:100vh;overflow:hidden;">
-
-    <LoginOverlay v-if="!store.currentUser" @loggedIn="onLoggedIn" />
+  <div class="app-root" style="height:100vh;overflow:hidden;">
+    <LoginOverlay v-if="!store.currentUser" @loggedIn="() => {}" />
 
     <template v-else>
-      <div class="em-layout" :class="{ 'sidebar-hidden': !sidebarOpen }">
-        <button class="em-toggle" @click="sidebarOpen = !sidebarOpen">
+      <div class="layout" :class="{ 'sidebar-hidden': !sidebarOpen }">
+        <button class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen">
           {{ sidebarOpen ? '◀' : '▶' }}
         </button>
+
         <AppSidebar
           :networkRef="networkRef"
           @openSettings="showSettings = true"
           @openAdmin="showAdmin = true"
-          @openAddManager="showAddManager = true"
+          @openAddManager="showAddMgr = true"
         />
+
         <NetworkGraph
           ref="networkRef"
           @nodeClick="onNodeClick"
@@ -80,13 +68,12 @@ async function onGraphReady() {
         />
       </div>
 
-      <NodeModal       v-if="activeNodeId"       :nodeId="activeNodeId"       @close="activeNodeId = null" />
-      <EdgeModal       v-if="activeEdgeId"       :edgeId="activeEdgeId"       @close="activeEdgeId = null" />
-      <CustomerModal   v-if="activeCustomerEdge" :edgeId="activeCustomerEdge" @close="activeCustomerEdge = null" />
-      <AddManagerModal v-if="showAddManager"     @close="showAddManager = false" />
-      <SettingsModal   v-if="showSettings"       @close="showSettings = false" />
-      <AdminPanel      v-if="showAdmin"          @close="showAdmin = false" />
+      <NodeModal       v-if="activeNode"     :nodeId="activeNode"     @close="activeNode = null" />
+      <EdgeModal       v-if="activeEdge"     :edgeId="activeEdge"     @close="activeEdge = null" />
+      <CustomerModal   v-if="activeCustomer" :edgeId="activeCustomer" @close="activeCustomer = null" />
+      <AddManagerModal v-if="showAddMgr"     @close="showAddMgr = false" />
+      <SettingsModal   v-if="showSettings"   @close="showSettings = false" />
+      <AdminPanel      v-if="showAdmin"      @close="showAdmin = false" />
     </template>
-
   </div>
 </template>

@@ -32,27 +32,27 @@ async function submit() {
 
 <template>
   <Teleport to="body">
-    <div class="em-modal-bg em-root" @click.self="emit('close')">
-      <div class="em-modal" style="max-width: 420px;">
-        <div class="em-modal-header">
-          <div class="em-modal-title">担当者を追加</div>
-          <button class="em-modal-close" @click="emit('close')">×</button>
+    <div class="modal-bg app-root" @click.self="emit('close')">
+      <div class="modal" style="max-width: 420px;">
+        <div class="modal-header">
+          <div class="modal-title">担当者を追加</div>
+          <button class="modal-close" @click="emit('close')">×</button>
         </div>
-        <div class="em-modal-body">
-          <div class="em-form-group"><label class="em-label">担当者名 *</label><input class="em-input" v-model="form.name" placeholder=""></div>
-          <div class="em-form-group"><label class="em-label">社員ID *</label><input class="em-input" v-model="form.empId" placeholder="" style="font-family: monospace;"></div>
-          <div class="em-form-group">
-            <label class="em-label">パスワード *</label>
+        <div class="modal-body">
+          <div class="form-group"><label class="label">担当者名 *</label><input class="input" v-model="form.name" placeholder=""></div>
+          <div class="form-group"><label class="label">社員ID *</label><input class="input" v-model="form.empId" placeholder="" style="font-family: monospace;"></div>
+          <div class="form-group">
+            <label class="label">パスワード *</label>
             <div style="display: flex; gap: 6px;">
-              <input class="em-input" v-model="form.password" placeholder="" style="flex: 1; margin: 0; font-family: monospace;">
-              <button class="em-btn em-btn-ghost em-btn-sm" @click="genPw" style="margin: 0; flex-shrink: 0;">生成</button>
+              <input class="input" v-model="form.password" placeholder="" style="flex: 1; margin: 0; font-family: monospace;">
+              <button class="btn btn-ghost btn-sm" @click="genPw" style="margin: 0; flex-shrink: 0;">生成</button>
             </div>
           </div>
           <div style="min-height: 18px; font-size: 12px; color: #f87171; margin-bottom: 8px;">{{ error }}</div>
         </div>
-        <div class="em-modal-actions">
-          <button class="em-btn" @click="submit">追加する</button>
-          <button class="em-btn em-btn-secondary" @click="emit('close')">キャンセル</button>
+        <div class="modal-footer">
+          <button class="btn" @click="submit">追加する</button>
+          <button class="btn btn-red" @click="emit('close')">キャンセル</button>
         </div>
       </div>
     </div>
