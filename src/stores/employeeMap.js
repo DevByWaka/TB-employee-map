@@ -541,9 +541,38 @@ export const useEmployeeMapStore = defineStore('employeeMap', () => {
     _nodes.update({ id: nodeId, password: password || null })
   }
 
+  // ── 表示/非表示切替（AppSidebarから呼ぶ）──
+  function toggleVisibility(key, visible, visState) {
+    if (!_nodes || !_edges) return
+    if (['employee', 'site', 'manager'].includes(key)) {
+      _nodes.update(
+        _nodes.get({ filter: n => n.group === key })
+              .map(n => ({ id: n.id, hidden: !visible }))
+      )
+      // 全エッジを visState から再計算
+      _edges.update(_edges.get().map(e => {
+        const fromGroup = _nodes.get(e.from)?.group
+        const toGroup   = _nodes.get(e.to)?.group
+        const fromHidden = fromGroup ? !visState[fromGroup] : false
+        const toHidden   = toGroup   ? !visState[toGroup]   : false
+        return { id: e.id, hidden: fromHidden || toHidden }
+      }))
+    } else {
+      _edges.update(_edges.get().map(e => {
+        const isTarget =
+          (key === 'home'         && !e.edgeType && (e.assignmentType || 'home') === 'home') ||
+          (key === 'support'      && !e.edgeType && e.assignmentType === 'support') ||
+          (key === 'manages'      && e.edgeType === 'manages') ||
+          (key === 'manager-site' && e.edgeType === 'manager-site')
+        if (!isTarget) return { id: e.id }
+        return { id: e.id, hidden: !visible }
+      }))
+    }
+  }
+
   return {
     dbStatus, dbConnected, currentUser, nodeVersion, edgeVersion, isAdmin,
-    getNodes, getEdges, injectDataSets,
+    getNodes, getEdges, injectDataSets, toggleVisibility,
     canEdit, canEditEdge,
     loadConfig, saveDbSettings, handleLogin, signOut,
     loadFromDb, startPolling, stopPolling, subscribeRealtime,

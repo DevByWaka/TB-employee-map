@@ -71,37 +71,8 @@ function focusNode(nodeId) {
 function toggleVis(key) {
   visState.value[key] = !visState.value[key]
   const visible = visState.value[key]
-  const nodes = store.getNodes()
-  const edges = store.getEdges()
-  if (!nodes || !edges) return
-
-  if (['employee', 'site', 'manager'].includes(key)) {
-    // 対象グループの hidden を更新
-    nodes.update(
-      nodes.get({ filter: n => n.group === key })
-           .map(n => ({ id: n.id, hidden: !visible }))
-    )
-    // 全エッジの hidden を再計算（visState から判断）
-    edges.update(edges.get().map(e => {
-      const fromGroup = nodes.get(e.from)?.group
-      const toGroup   = nodes.get(e.to)?.group
-      // from/to いずれかのグループが非表示なら隠す
-      const fromHidden = fromGroup ? !visState.value[fromGroup] : false
-      const toHidden   = toGroup   ? !visState.value[toGroup]   : false
-      return { id: e.id, hidden: fromHidden || toHidden }
-    }))
-  } else {
-    // エッジタイプの表示切替
-    edges.update(edges.get().map(e => {
-      const isTarget =
-        (key === 'home'         && !e.edgeType && (e.assignmentType || 'home') === 'home') ||
-        (key === 'support'      && !e.edgeType && e.assignmentType === 'support') ||
-        (key === 'manages'      && e.edgeType === 'manages') ||
-        (key === 'manager-site' && e.edgeType === 'manager-site')
-      if (!isTarget) return { id: e.id }  // 対象外は変更しない
-      return { id: e.id, hidden: !visible }
-    }))
-  }
+  // ストア内の _nodes/_edges を直接操作（storeにtoggleVisibilityを委譲）
+  store.toggleVisibility(key, visible, visState.value)
 }
 
 function nodeColor(key) {
