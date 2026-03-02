@@ -59,11 +59,11 @@ async function doReset() {
           <div class="em-form-group">
             <label class="em-label">{{ dbType === 'supabase' ? 'Supabase URL' : 'PostgREST URL' }}</label>
             <input class="em-input" v-model="sbUrl" style="font-family:monospace;font-size:12px;"
-              :placeholder="dbType === 'supabase' ? 'https://xxxx.supabase.co' : 'http://localhost:3000'" />
+              placeholder="" />
           </div>
           <div v-if="dbType === 'supabase'" class="em-form-group">
             <label class="em-label">anon key</label>
-            <input class="em-input" v-model="sbKey" placeholder="eyJhbGciOi..." style="font-family:monospace;font-size:11px;" />
+            <input class="em-input" v-model="sbKey" placeholder="" style="font-family:monospace;font-size:11px;" />
           </div>
           <button class="em-btn em-btn-warning" @click="saveDb" :disabled="saving">
             {{ saving ? '接続中...' : '接続して保存' }}

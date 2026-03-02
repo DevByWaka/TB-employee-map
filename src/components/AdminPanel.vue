@@ -73,9 +73,9 @@ async function saveMgrPw(mgr) {
 
           <hr class="em-divider">
           <div class="em-view-title">管理者を追加</div>
-          <div class="em-form-group"><label class="em-label">名前</label><input class="em-input" v-model="newAdmin.name" placeholder="管理者名"></div>
+          <div class="em-form-group"><label class="em-label">名前</label><input class="em-input" v-model="newAdmin.name" placeholder=""></div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div class="em-form-group"><label class="em-label">社員ID</label><input class="em-input" v-model="newAdmin.empId" placeholder="例: ADM001" style="font-family: monospace;"></div>
+            <div class="em-form-group"><label class="em-label">社員ID</label><input class="em-input" v-model="newAdmin.empId" placeholder="" style="font-family: monospace;"></div>
             <div class="em-form-group">
               <label class="em-label">パスワード</label>
               <div style="display: flex; gap: 5px;">

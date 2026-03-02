@@ -94,7 +94,7 @@ function backToDb() {
       <div class="em-form-group">
         <label class="em-label">{{ dbForm.type === 'supabase' ? 'Supabase URL' : 'PostgREST URL' }}</label>
         <input class="em-input" v-model="dbForm.url"
-          :placeholder="dbForm.type === 'supabase' ? 'https://xxxx.supabase.co' : 'http://localhost:3000'"
+          placeholder=""
           style="font-family:monospace;font-size:12px;"
           @keydown.enter="connectDb" />
       </div>
@@ -102,7 +102,7 @@ function backToDb() {
       <div v-if="dbForm.type === 'supabase'" class="em-form-group">
         <label class="em-label">anon key</label>
         <input class="em-input" v-model="dbForm.key"
-          placeholder="eyJhbGciOi..."
+          placeholder=""
           style="font-family:monospace;font-size:11px;"
           @keydown.enter="connectDb" />
       </div>
@@ -132,13 +132,13 @@ function backToDb() {
 
       <div class="em-form-group">
         <label class="em-label">社員ID</label>
-        <input class="em-input" v-model="loginForm.employeeId" placeholder="例: EMP001"
+        <input class="em-input" v-model="loginForm.employeeId" placeholder=""
           @keydown.enter="pwInput?.focus()" />
       </div>
       <div class="em-form-group" style="margin-bottom:16px;">
         <label class="em-label">パスワード</label>
         <input ref="pwInput" type="password" class="em-input" v-model="loginForm.password"
-          placeholder="••••••••" @keydown.enter="submitLogin" />
+          placeholder="" @keydown.enter="submitLogin" />
       </div>
 
       <div style="min-height:18px;margin-bottom:10px;font-size:12px;color:#f87171;">{{ loginError }}</div>

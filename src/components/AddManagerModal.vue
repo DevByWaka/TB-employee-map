@@ -39,12 +39,12 @@ async function submit() {
           <button class="em-modal-close" @click="emit('close')">×</button>
         </div>
         <div class="em-modal-body">
-          <div class="em-form-group"><label class="em-label">担当者名 *</label><input class="em-input" v-model="form.name" placeholder="例: 山田部長"></div>
-          <div class="em-form-group"><label class="em-label">社員ID *</label><input class="em-input" v-model="form.empId" placeholder="例: EMP001" style="font-family: monospace;"></div>
+          <div class="em-form-group"><label class="em-label">担当者名 *</label><input class="em-input" v-model="form.name" placeholder=""></div>
+          <div class="em-form-group"><label class="em-label">社員ID *</label><input class="em-input" v-model="form.empId" placeholder="" style="font-family: monospace;"></div>
           <div class="em-form-group">
             <label class="em-label">パスワード *</label>
             <div style="display: flex; gap: 6px;">
-              <input class="em-input" v-model="form.password" placeholder="ログイン用パスワード" style="flex: 1; margin: 0; font-family: monospace;">
+              <input class="em-input" v-model="form.password" placeholder="" style="flex: 1; margin: 0; font-family: monospace;">
               <button class="em-btn em-btn-ghost em-btn-sm" @click="genPw" style="margin: 0; flex-shrink: 0;">生成</button>
             </div>
           </div>

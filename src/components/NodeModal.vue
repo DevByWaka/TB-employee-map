@@ -285,7 +285,7 @@ async function doDeleteNode() {
               <div class="em-form-group">
                 <label class="em-label">電話番号</label>
                 <div v-for="(_, i) in form.phones" :key="i" style="display: flex; gap: 6px; margin-bottom: 6px;">
-                  <input type="tel" class="em-input" v-model="form.phones[i]" style="flex: 1; margin: 0;" placeholder="例: 090-1234-5678">
+                  <input type="tel" class="em-input" v-model="form.phones[i]" style="flex: 1; margin: 0;" placeholder="">
                   <button class="em-btn em-btn-danger em-btn-sm" @click="form.phones.splice(i, 1)" style="margin: 0; padding: 4px 8px;">✕</button>
                 </div>
                 <button class="em-btn" @click="form.phones.push('')" style="margin-top: 4px; padding: 6px; font-size: 12px;">＋ 番号を追加</button>

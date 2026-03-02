@@ -170,7 +170,7 @@ async function doAddSite() {
     <!-- 検索 -->
     <div class="em-section">
       <div class="em-section-title">🔍 検索</div>
-      <input class="em-input" v-model="searchQuery" placeholder="名前・社員ID・電話・メール・メモ" />
+      <input class="em-input" v-model="searchQuery" placeholder="" />
       <div v-if="searchQuery" style="margin-top:8px;">
         <div v-if="!searchHits.length" class="em-no-result">該当なし</div>
         <div v-for="hit in searchHits" :key="hit.node.id" class="em-search-item"
@@ -190,7 +190,7 @@ async function doAddSite() {
       <div class="em-section-title">従業員を追加</div>
       <div class="em-form-group">
         <label class="em-label">従業員名</label>
-        <input class="em-input" v-model="newEmployeeName" placeholder="例: 山田太郎" @keydown.enter="doAddEmployee" />
+        <input class="em-input" v-model="newEmployeeName" placeholder="" @keydown.enter="doAddEmployee" />
       </div>
       <button class="em-btn" @click="doAddEmployee">従業員を追加</button>
     </div>
@@ -200,7 +200,7 @@ async function doAddSite() {
       <div class="em-section-title">現場を追加</div>
       <div class="em-form-group">
         <label class="em-label">現場名</label>
-        <input class="em-input" v-model="newSiteName" placeholder="例: 〇〇工場" @keydown.enter="doAddSite" />
+        <input class="em-input" v-model="newSiteName" placeholder="" @keydown.enter="doAddSite" />
       </div>
       <button class="em-btn" @click="doAddSite">現場を追加</button>
     </div>

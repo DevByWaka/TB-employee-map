@@ -4,6 +4,7 @@
 
 - Node.js 18以上
 - Supabaseアカウント（無料プランでOK）
+- GitHubアカウント（公開する場合）
 
 ---
 
@@ -18,7 +19,8 @@
 
 ## STEP 2: Supabase にテーブルを作成
 
-Supabase ダッシュボードの左メニューから **SQL Editor** を開き、以下を全て貼り付けて **Run** をクリックします。
+Supabase ダッシュボードの左メニューから **SQL Editor** を開き、  
+以下を全て貼り付けて **Run** をクリックします。
 
 ```sql
 create table nodes (
@@ -63,7 +65,7 @@ alter table nodes  disable row level security;
 alter table edges  disable row level security;
 alter table admins disable row level security;
 
--- 初期管理者アカウント（社員ID・パスワードは自由に変更してください）
+-- 初期管理者（社員ID・パスワードは自由に変更してください）
 insert into admins (name, employee_id, password)
 values ('管理者', '00000000', 'admin1234');
 ```
@@ -79,13 +81,13 @@ values ('管理者', '00000000', 'admin1234');
 | Project URL | `https://xxxx.supabase.co` の形式 |
 | anon / public key | `eyJhbGciOi...` で始まる長い文字列 |
 
-この2つはSTEP 6で使います。
+この2つは STEP 7 で使います。
 
 ---
 
 ## STEP 4: Vite プロジェクトを作成
 
-PowerShell（またはターミナル）で以下を実行します。
+PowerShell で以下を実行します。
 
 ```powershell
 npm create vite@latest vue-project -- --template vue
@@ -98,47 +100,49 @@ npm install vue-router pinia
 
 ## STEP 5: アプリのファイルを配置
 
-ダウンロードした `employee-map-complete.zip` を展開します。  
-`fresh/` フォルダの中身を、プロジェクトに以下のように上書きコピーします。
+ダウンロードした ZIP を展開し、`fresh/` フォルダの中身をプロジェクトに上書きコピーします。
 
 ```
 vue-project/
-├── index.html          ← fresh/index.html で上書き
-├── vite.config.js      ← fresh/vite.config.js で上書き
+├── index.html              ← fresh/index.html で上書き
+├── vite.config.js          ← fresh/vite.config.js で上書き
+├── .github/
+│   └── workflows/
+│       └── deploy.yml      ← 新規追加（GitHub Pages用）
 └── src/
-    ├── main.js         ← fresh/src/main.js で上書き
-    ├── App.vue         ← fresh/src/App.vue で上書き
+    ├── main.js             ← fresh/src/main.js で上書き
+    ├── App.vue             ← fresh/src/App.vue で上書き
     ├── assets/
-    │   └── employee-map.css    ← 新規追加
+    │   └── employee-map.css
     ├── router/
-    │   └── index.js            ← 新規追加
+    │   └── index.js
     ├── stores/
-    │   └── employeeMap.js      ← 新規追加
+    │   └── employeeMap.js
     ├── views/
-    │   └── MapView.vue         ← 新規追加
+    │   └── MapView.vue
     └── components/
-        ├── LoginOverlay.vue    ← 新規追加
-        ├── NetworkGraph.vue    ← 新規追加
-        ├── AppSidebar.vue      ← 新規追加
-        ├── NodeModal.vue       ← 新規追加
-        ├── EdgeModal.vue       ← 新規追加
-        ├── CustomerModal.vue   ← 新規追加
-        ├── AddManagerModal.vue ← 新規追加
-        ├── SettingsModal.vue   ← 新規追加
-        └── AdminPanel.vue      ← 新規追加
+        ├── LoginOverlay.vue
+        ├── NetworkGraph.vue
+        ├── AppSidebar.vue
+        ├── NodeModal.vue
+        ├── EdgeModal.vue
+        ├── CustomerModal.vue
+        ├── AddManagerModal.vue
+        ├── SettingsModal.vue
+        └── AdminPanel.vue
 ```
 
 既存の `src/style.css`、`src/components/HelloWorld.vue` などは削除して構いません。
 
 ---
 
-## STEP 6: アプリを起動
+## STEP 6: ローカルで動作確認
 
 ```powershell
 npm run dev
 ```
 
-ブラウザで `http://localhost:5173/` を開きます。
+ブラウザで `http://localhost:5173/` を開き、DB設定画面が表示されることを確認します。
 
 ---
 
@@ -174,9 +178,7 @@ npm run dev
 
 ### 管理者パスワードを変更する
 
-サイドバー右上の 👑 ボタン → **管理者パネル** を開き、  
-管理者アカウントを削除して新しいものを作り直すか、  
-Supabase SQL Editor で直接更新します。
+Supabase SQL Editor で実行します。
 
 ```sql
 update admins
@@ -193,7 +195,8 @@ where employee_id = '00000000';
 
 ## config.json を使う場合（オプション）
 
-毎回 DB設定画面が出るのを防ぎたい場合、プロジェクトの `public/` フォルダに `config.json` を作成します。
+プロジェクトの `public/` フォルダに `config.json` を作成すると、  
+起動時に自動読み込みされ DB設定画面がスキップされます。
 
 ```json
 {
@@ -205,7 +208,9 @@ where employee_id = '00000000';
 }
 ```
 
-これで起動時に自動読み込みされ、接続済みであればすぐにログイン画面が表示されます。
+> GitHub Pages で公開する場合、このファイルも公開されます。  
+> セキュリティが気になる場合は config.json を使わず、  
+> 各自が初回アクセス時に画面で入力する方式を推奨します。
 
 ---
 
