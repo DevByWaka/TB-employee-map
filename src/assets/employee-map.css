@@ -1,3 +1,7 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; background: #0a0e1a; overflow: hidden; }
+#app { width: 100%; height: 100%; }
+
 :root {
   --em-bg: #0a0e1a;
   --em-panel: #141823;
