@@ -62,11 +62,10 @@ async function onGraphReady() {
     <LoginOverlay v-if="!store.currentUser" @loggedIn="onLoggedIn" />
 
     <template v-else>
-      <button class="em-toggle" @click="sidebarOpen = !sidebarOpen">
-        {{ sidebarOpen ? '◀' : '▶' }}
-      </button>
-
       <div class="em-layout" :class="{ 'sidebar-hidden': !sidebarOpen }">
+        <button class="em-toggle" @click="sidebarOpen = !sidebarOpen">
+          {{ sidebarOpen ? '◀' : '▶' }}
+        </button>
         <AppSidebar
           :networkRef="networkRef"
           @openSettings="showSettings = true"

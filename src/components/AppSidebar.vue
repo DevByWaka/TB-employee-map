@@ -74,18 +74,33 @@ function toggleVis(key) {
   const nodes = store.getNodes()
   const edges = store.getEdges()
   if (!nodes || !edges) return
+
   if (['employee', 'site', 'manager'].includes(key)) {
-    nodes.update(nodes.get({ filter: n => n.group === key }).map(n => ({ id: n.id, hidden: !visible })))
-    const hiddenIds = new Set(nodes.get({ filter: n => n.hidden }).map(n => n.id))
-    edges.update(edges.get().map(e => ({ id: e.id, hidden: hiddenIds.has(e.from) || hiddenIds.has(e.to) })))
+    // 対象グループの hidden を更新
+    nodes.update(
+      nodes.get({ filter: n => n.group === key })
+           .map(n => ({ id: n.id, hidden: !visible }))
+    )
+    // 全エッジの hidden を再計算（visState から判断）
+    edges.update(edges.get().map(e => {
+      const fromGroup = nodes.get(e.from)?.group
+      const toGroup   = nodes.get(e.to)?.group
+      // from/to いずれかのグループが非表示なら隠す
+      const fromHidden = fromGroup ? !visState.value[fromGroup] : false
+      const toHidden   = toGroup   ? !visState.value[toGroup]   : false
+      return { id: e.id, hidden: fromHidden || toHidden }
+    }))
   } else {
-    edges.update(edges.get({ filter: e => {
-      if (key === 'home')         return !e.edgeType && (e.assignmentType || 'home') === 'home'
-      if (key === 'support')      return !e.edgeType && e.assignmentType === 'support'
-      if (key === 'manages')      return e.edgeType === 'manages'
-      if (key === 'manager-site') return e.edgeType === 'manager-site'
-      return false
-    }}).map(e => ({ id: e.id, hidden: !visible })))
+    // エッジタイプの表示切替
+    edges.update(edges.get().map(e => {
+      const isTarget =
+        (key === 'home'         && !e.edgeType && (e.assignmentType || 'home') === 'home') ||
+        (key === 'support'      && !e.edgeType && e.assignmentType === 'support') ||
+        (key === 'manages'      && e.edgeType === 'manages') ||
+        (key === 'manager-site' && e.edgeType === 'manager-site')
+      if (!isTarget) return { id: e.id }  // 対象外は変更しない
+      return { id: e.id, hidden: !visible }
+    }))
   }
 }
 
