@@ -5,7 +5,7 @@ import { useEmployeeMapStore } from '@/stores/employeeMap'
 const store = useEmployeeMapStore()
 const emit  = defineEmits(['loggedIn'])
 
-// ステップ管理: 'checking' → 'db' or 'login'
+// ステップ: 'checking' → 'db' → 'setup' or 'login'
 const step      = ref('checking')
 const dbLoading = ref(false)
 const dbError   = ref('')
@@ -20,13 +20,22 @@ const dbForm = reactive({
 onMounted(async () => {
   const ok = await store.loadConfig()
   if (ok) {
-    // 接続確認（DataSetなしでOK）
     await store.loadFromDb()
-    if (store.dbConnected) { step.value = 'login'; return }
+    if (store.dbConnected) {
+      await checkAdmins()
+      return
+    }
   }
   step.value = 'db'
 })
 
+// 管理者が存在するか確認してステップを決定
+async function checkAdmins() {
+  const admins = await store.loadAdminList()
+  step.value = admins.length === 0 ? 'setup' : 'login'
+}
+
+// ── DB設定 ──────────────────────────────────────────────────────────────
 async function connectDb() {
   dbError.value = ''
   if (!dbForm.url.trim()) { dbError.value = 'URLを入力してください'; return }
@@ -35,7 +44,7 @@ async function connectDb() {
   try {
     await store.saveDbSettings(dbForm.type, dbForm.url.trim(), dbForm.key.trim())
     if (!store.dbConnected) throw new Error('接続できませんでした。URLとKeyを確認してください。')
-    step.value = 'login'
+    await checkAdmins()
   } catch (e) {
     dbError.value = e.message || '接続に失敗しました'
   } finally {
@@ -43,6 +52,33 @@ async function connectDb() {
   }
 }
 
+// ── 初期管理者作成 ───────────────────────────────────────────────────────
+const setupForm    = reactive({ name: '', employeeId: '', password: '', confirm: '' })
+const setupError   = ref('')
+const setupLoading = ref(false)
+const idInput      = ref(null)
+const pwInput1     = ref(null)
+const cfInput      = ref(null)
+
+async function submitSetup() {
+  setupError.value = ''
+  if (!setupForm.name.trim())        { setupError.value = '名前を入力してください'; return }
+  if (!setupForm.employeeId.trim())  { setupError.value = '社員IDを入力してください'; return }
+  if (!setupForm.password)           { setupError.value = 'パスワードを入力してください'; return }
+  if (setupForm.password.length < 6) { setupError.value = 'パスワードは6文字以上にしてください'; return }
+  if (setupForm.password !== setupForm.confirm) { setupError.value = 'パスワードが一致しません'; return }
+  setupLoading.value = true
+  try {
+    await store.createAdmin(setupForm.name.trim(), setupForm.employeeId.trim(), setupForm.password)
+    step.value = 'login'
+  } catch (e) {
+    setupError.value = e.message
+  } finally {
+    setupLoading.value = false
+  }
+}
+
+// ── ログイン ─────────────────────────────────────────────────────────────
 const loginForm    = reactive({ employeeId: '', password: '' })
 const loginError   = ref('')
 const loginLoading = ref(false)
@@ -75,7 +111,7 @@ function backToDb() {
     <!-- 起動確認中 -->
     <div v-if="step === 'checking'" class="em-login-box" style="text-align:center;">
       <div class="em-logo">従業員配置マップ</div>
-      <div style="padding:24px 0; color:var(--em-muted); font-size:13px;">⏳ 接続確認中...</div>
+      <div style="padding:24px 0;color:var(--em-muted);font-size:13px;">⏳ 接続確認中...</div>
     </div>
 
     <!-- DB設定 -->
@@ -94,7 +130,6 @@ function backToDb() {
       <div class="em-form-group">
         <label class="em-label">{{ dbForm.type === 'supabase' ? 'Supabase URL' : 'PostgREST URL' }}</label>
         <input class="em-input" v-model="dbForm.url"
-          placeholder=""
           style="font-family:monospace;font-size:12px;"
           @keydown.enter="connectDb" />
       </div>
@@ -102,7 +137,6 @@ function backToDb() {
       <div v-if="dbForm.type === 'supabase'" class="em-form-group">
         <label class="em-label">anon key</label>
         <input class="em-input" v-model="dbForm.key"
-          placeholder=""
           style="font-family:monospace;font-size:11px;"
           @keydown.enter="connectDb" />
       </div>
@@ -119,6 +153,44 @@ function backToDb() {
       </p>
     </div>
 
+    <!-- 初期管理者作成 -->
+    <div v-else-if="step === 'setup'" class="em-login-box">
+      <div class="em-logo">従業員配置マップ</div>
+      <div class="em-subtitle">INITIAL SETUP — CREATE ADMIN</div>
+
+      <div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:12px;color:#fde047;line-height:1.6;">
+        👑 管理者アカウントがまだ存在しません。<br>最初の管理者を作成してください。
+      </div>
+
+      <div class="em-form-group">
+        <label class="em-label">名前</label>
+        <input class="em-input" v-model="setupForm.name"
+          @keydown.enter="idInput?.focus()" />
+      </div>
+      <div class="em-form-group">
+        <label class="em-label">社員ID</label>
+        <input ref="idInput" class="em-input" v-model="setupForm.employeeId"
+          style="font-family:monospace;"
+          @keydown.enter="pwInput1?.focus()" />
+      </div>
+      <div class="em-form-group">
+        <label class="em-label">パスワード（6文字以上）</label>
+        <input ref="pwInput1" type="password" class="em-input" v-model="setupForm.password"
+          @keydown.enter="cfInput?.focus()" />
+      </div>
+      <div class="em-form-group" style="margin-bottom:16px;">
+        <label class="em-label">パスワード（確認）</label>
+        <input ref="cfInput" type="password" class="em-input" v-model="setupForm.confirm"
+          @keydown.enter="submitSetup" />
+      </div>
+
+      <div style="min-height:18px;margin-bottom:10px;font-size:12px;color:#f87171;">{{ setupError }}</div>
+
+      <button class="em-btn" @click="submitSetup" :disabled="setupLoading">
+        {{ setupLoading ? '作成中...' : '管理者を作成してログインへ →' }}
+      </button>
+    </div>
+
     <!-- ログイン -->
     <div v-else-if="step === 'login'" class="em-login-box">
       <div class="em-logo">従業員配置マップ</div>
@@ -132,13 +204,13 @@ function backToDb() {
 
       <div class="em-form-group">
         <label class="em-label">社員ID</label>
-        <input class="em-input" v-model="loginForm.employeeId" placeholder=""
+        <input class="em-input" v-model="loginForm.employeeId"
           @keydown.enter="pwInput?.focus()" />
       </div>
       <div class="em-form-group" style="margin-bottom:16px;">
         <label class="em-label">パスワード</label>
         <input ref="pwInput" type="password" class="em-input" v-model="loginForm.password"
-          placeholder="" @keydown.enter="submitLogin" />
+          @keydown.enter="submitLogin" />
       </div>
 
       <div style="min-height:18px;margin-bottom:10px;font-size:12px;color:#f87171;">{{ loginError }}</div>

@@ -64,11 +64,9 @@ create table admins (
 alter table nodes  disable row level security;
 alter table edges  disable row level security;
 alter table admins disable row level security;
-
--- 初期管理者（社員ID・パスワードは自由に変更してください）
-insert into admins (name, employee_id, password)
-values ('管理者', '00000000', 'admin1234');
 ```
+
+> 管理者アカウントはアプリ初回起動時に画面から作成します（SQLへの記載不要）。
 
 ---
 
@@ -104,14 +102,14 @@ npm install vue-router pinia
 
 ```
 vue-project/
-├── index.html              ← fresh/index.html で上書き
-├── vite.config.js          ← fresh/vite.config.js で上書き
+├── index.html
+├── vite.config.js
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml      ← 新規追加（GitHub Pages用）
+│       └── deploy.yml      ← GitHub Pages 自動デプロイ設定
 └── src/
-    ├── main.js             ← fresh/src/main.js で上書き
-    ├── App.vue             ← fresh/src/App.vue で上書き
+    ├── main.js
+    ├── App.vue
     ├── assets/
     │   └── employee-map.css
     ├── router/
@@ -120,16 +118,7 @@ vue-project/
     │   └── employeeMap.js
     ├── views/
     │   └── MapView.vue
-    └── components/
-        ├── LoginOverlay.vue
-        ├── NetworkGraph.vue
-        ├── AppSidebar.vue
-        ├── NodeModal.vue
-        ├── EdgeModal.vue
-        ├── CustomerModal.vue
-        ├── AddManagerModal.vue
-        ├── SettingsModal.vue
-        └── AdminPanel.vue
+    └── components/  (9ファイル)
 ```
 
 既存の `src/style.css`、`src/components/HelloWorld.vue` などは削除して構いません。
@@ -142,7 +131,7 @@ vue-project/
 npm run dev
 ```
 
-ブラウザで `http://localhost:5173/` を開き、DB設定画面が表示されることを確認します。
+ブラウザで `http://localhost:5173/` を開きます。
 
 ---
 
@@ -156,46 +145,47 @@ npm run dev
 | URL | STEP 3 で確認した Project URL |
 | anon key | STEP 3 で確認した anon / public key |
 
-**「接続してログインへ →」** をクリックします。  
-成功するとログイン画面に切り替わります。
-
-> 設定は自動的に保存され、次回起動時からは自動接続されます。
+**「接続してログインへ →」** をクリックします。
 
 ---
 
-## STEP 8: ログイン
+## STEP 8: 初期管理者を作成
 
-| 項目 | 値 |
-|------|-----|
-| 社員ID | `00000000` |
-| パスワード | `admin1234` |
+DB接続後、管理者がまだいない場合は **管理者作成画面** が自動的に表示されます。
 
-（STEP 2 の SQL で設定した値）
+| 項目 | 内容 |
+|------|------|
+| 名前 | 管理者の名前 |
+| 社員ID | ログイン時に使うID |
+| パスワード | 6文字以上 |
+| パスワード（確認） | 同じものを再入力 |
+
+作成後、そのままログイン画面へ進みます。
+
+---
+
+## STEP 9: ログイン
+
+STEP 8 で設定した社員ID・パスワードでログインします。
 
 ---
 
 ## 初回ログイン後にやること
-
-### 管理者パスワードを変更する
-
-Supabase SQL Editor で実行します。
-
-```sql
-update admins
-set password = '新しいパスワード'
-where employee_id = '00000000';
-```
 
 ### 担当者を追加する
 
 サイドバーの **「担当者を追加」** ボタンから追加できます。  
 担当者のログイン用パスワードは管理者パネル（👑）で設定します。
 
+### 管理者を追加する
+
+管理者パネル（👑）→ **「管理者を追加」** から追加できます。
+
 ---
 
 ## config.json を使う場合（オプション）
 
-プロジェクトの `public/` フォルダに `config.json` を作成すると、  
+プロジェクトの `public/` フォルダに `config.json` を作成すると  
 起動時に自動読み込みされ DB設定画面がスキップされます。
 
 ```json
@@ -209,12 +199,12 @@ where employee_id = '00000000';
 ```
 
 > GitHub Pages で公開する場合、このファイルも公開されます。  
-> セキュリティが気になる場合は config.json を使わず、  
+> anon key の漏洩が気になる場合は config.json を使わず、  
 > 各自が初回アクセス時に画面で入力する方式を推奨します。
 
 ---
 
-## ログイン情報を忘れた場合
+## パスワードを忘れた場合
 
 Supabase の SQL Editor で確認・変更できます。
 
@@ -223,5 +213,5 @@ Supabase の SQL Editor で確認・変更できます。
 select name, employee_id, password from admins;
 
 -- パスワードをリセット
-update admins set password = 'newpassword' where employee_id = '00000000';
+update admins set password = 'newpassword' where employee_id = '社員ID';
 ```
