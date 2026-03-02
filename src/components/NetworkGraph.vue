@@ -7,15 +7,16 @@ const container = ref(null)
 const emit = defineEmits(['nodeClick', 'edgeClick', 'ready'])
 
 let network = null
+let _nodes = null
+let _edges = null
 
 onMounted(async () => {
   const vis = window.vis
 
-  const nodes = new vis.DataSet([])
-  const edges = new vis.DataSet([])
+  _nodes = new vis.DataSet([])
+  _edges = new vis.DataSet([])
 
-  // DataSet を Pinia ストアに注入
-  store.injectDataSets(nodes, edges)
+  store.injectDataSets(_nodes, _edges)
 
   const options = {
     nodes: {
@@ -42,14 +43,13 @@ onMounted(async () => {
     interaction: { hover: true, tooltipDelay: 100, dragNodes: true, dragView: true, zoomView: true },
   }
 
-  network = new vis.Network(container.value, { nodes, edges }, options)
+  network = new vis.Network(container.value, { nodes: _nodes, edges: _edges }, options)
 
   network.on('click', (params) => {
     if (params.nodes.length > 0) emit('nodeClick', params.nodes[0])
     else if (params.edges.length > 0) emit('edgeClick', params.edges[0])
   })
 
-  // DataSet注入完了を親に通知 → 親が loadFromDb を実行する
   emit('ready')
 
   document.addEventListener('visibilitychange', onVisibilityChange)
@@ -84,7 +84,11 @@ function focusNode(nodeId) {
   network?.selectNodes([nodeId])
 }
 
-defineExpose({ focusNode })
+// DataSet を外部に公開
+function getNodes() { return _nodes }
+function getEdges() { return _edges }
+
+defineExpose({ focusNode, getNodes, getEdges })
 </script>
 
 <template>

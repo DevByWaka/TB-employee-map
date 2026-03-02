@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useEmployeeMapStore, parsePhones } from '@/stores/employeeMap'
 
 const store = useEmployeeMapStore()
-defineProps({ networkRef: Object })
+const props = defineProps({ networkRef: Object })
 const emit = defineEmits(['openSettings', 'openAdmin', 'openAddManager'])
 
 const newEmployeeName = ref('')
@@ -64,15 +64,41 @@ const searchHits = computed(() => {
 function groupLabel(g) { return g === 'employee' ? '従業員' : g === 'manager' ? '担当者' : '現場' }
 
 function focusNode(nodeId) {
-  // networkRef.focusNode を呼ぶ
-  const nr = defineProps.networkRef
+  props.networkRef?.focusNode(nodeId)
 }
 
 function toggleVis(key) {
   visState.value[key] = !visState.value[key]
   const visible = visState.value[key]
-  // ストア内の _nodes/_edges を直接操作（storeにtoggleVisibilityを委譲）
-  store.toggleVisibility(key, visible, visState.value)
+
+  // networkRef経由でDataSetを直接取得
+  const nodes = props.networkRef?.getNodes()
+  const edges = props.networkRef?.getEdges()
+  if (!nodes || !edges) return
+
+  if (['employee', 'site', 'manager'].includes(key)) {
+    nodes.update(
+      nodes.get({ filter: n => n.group === key })
+           .map(n => ({ id: n.id, hidden: !visible }))
+    )
+    edges.update(edges.get().map(e => {
+      const fromGroup = nodes.get(e.from)?.group
+      const toGroup   = nodes.get(e.to)?.group
+      const fromHidden = fromGroup ? !visState.value[fromGroup] : false
+      const toHidden   = toGroup   ? !visState.value[toGroup]   : false
+      return { id: e.id, hidden: fromHidden || toHidden }
+    }))
+  } else {
+    edges.update(edges.get().map(e => {
+      const isTarget =
+        (key === 'home'         && !e.edgeType && (e.assignmentType || 'home') === 'home') ||
+        (key === 'support'      && !e.edgeType && e.assignmentType === 'support') ||
+        (key === 'manages'      && e.edgeType === 'manages') ||
+        (key === 'manager-site' && e.edgeType === 'manager-site')
+      if (!isTarget) return { id: e.id }
+      return { id: e.id, hidden: !visible }
+    }))
+  }
 }
 
 function nodeColor(key) {
@@ -160,7 +186,7 @@ async function doAddSite() {
       <div v-if="searchQuery" style="margin-top:8px;">
         <div v-if="!searchHits.length" class="em-no-result">該当なし</div>
         <div v-for="hit in searchHits" :key="hit.node.id" class="em-search-item"
-          @click="networkRef?.focusNode(hit.node.id)">
+          @click="focusNode(hit.node.id)">
           <span class="em-badge" :class="hit.node.group">{{ groupLabel(hit.node.group) }}</span>
           <div style="flex:1;min-width:0;">
             <div class="em-search-name">{{ hit.node.label }}</div>
