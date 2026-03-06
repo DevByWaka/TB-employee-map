@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useEmployeeMapStore } from '@/stores/employeeMap'
+import { graphSettings } from '@/stores/graphSettings'
 
 const store = useEmployeeMapStore()
 const container = ref(null)
@@ -8,15 +9,9 @@ const emit = defineEmits(['nodeClick', 'edgeClick', 'ready'])
 
 let network = null
 
-onMounted(() => {
-  const vis = window.vis
-  const nodes = new vis.DataSet([])
-  const edges = new vis.DataSet([])
-
-  // ストアのモジュール変数に注入（シングルトン確定）
-  store.injectDataSets(nodes, edges)
-
-  network = new vis.Network(container.value, { nodes, edges }, {
+function buildOptions() {
+  const s = graphSettings.values
+  return {
     nodes: {
       shape: 'dot', size: 25,
       font: { size: 14, color: '#f3f4f6', face: 'Noto Sans JP' },
@@ -25,7 +20,7 @@ onMounted(() => {
     },
     edges: {
       width: 2,
-      smooth: { type: 'continuous', roundness: 0.5 },
+      smooth: { type: 'continuous', roundness: s.roundness },
       shadow: { enabled: true, color: 'rgba(0,0,0,0.2)', size: 5 },
     },
     groups: {
@@ -35,18 +30,34 @@ onMounted(() => {
     },
     physics: {
       enabled: true,
-      barnesHut: { gravitationalConstant: -8000, centralGravity: 0.3, springLength: 200, springConstant: 0.04, damping: 0.09, avoidOverlap: 0.5 },
+      barnesHut: {
+        gravitationalConstant: s.gravitationalConstant,
+        centralGravity:        s.centralGravity,
+        springLength:          s.springLength,
+        springConstant:        s.springConstant,
+        damping:               s.damping,
+        avoidOverlap:          s.avoidOverlap,
+      },
       stabilization: { enabled: true, iterations: 100 },
     },
     interaction: { hover: true, tooltipDelay: 100, dragNodes: true, dragView: true, zoomView: true },
-  })
+  }
+}
+
+onMounted(() => {
+  const vis = window.vis
+  const nodes = new vis.DataSet([])
+  const edges = new vis.DataSet([])
+
+  store.injectDataSets(nodes, edges)
+
+  network = new vis.Network(container.value, { nodes, edges }, buildOptions())
 
   network.on('click', params => {
     if (params.nodes.length > 0) emit('nodeClick', params.nodes[0])
     else if (params.edges.length > 0) emit('edgeClick', params.edges[0])
   })
 
-  // DataSet注入完了を通知 → MapViewがloadFromDbを呼ぶ
   emit('ready')
 
   document.addEventListener('visibilitychange', onVisChange)
@@ -73,7 +84,26 @@ function focusNode(nodeId) {
   network?.selectNodes([nodeId])
 }
 
-defineExpose({ focusNode })
+// 物理設定をリアルタイムで適用
+function applyPhysics() {
+  if (!network) return
+  const s = graphSettings.values
+  network.setOptions({
+    edges: { smooth: { type: 'continuous', roundness: s.roundness } },
+    physics: {
+      barnesHut: {
+        gravitationalConstant: s.gravitationalConstant,
+        centralGravity:        s.centralGravity,
+        springLength:          s.springLength,
+        springConstant:        s.springConstant,
+        damping:               s.damping,
+        avoidOverlap:          s.avoidOverlap,
+      },
+    },
+  })
+}
+
+defineExpose({ focusNode, applyPhysics })
 </script>
 
 <template>

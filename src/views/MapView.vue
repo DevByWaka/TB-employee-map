@@ -72,7 +72,7 @@ async function onGraphReady() {
       <EdgeModal       v-if="activeEdge"     :edgeId="activeEdge"     @close="activeEdge = null" />
       <CustomerModal   v-if="activeCustomer" :edgeId="activeCustomer" @close="activeCustomer = null" />
       <AddManagerModal v-if="showAddMgr"     @close="showAddMgr = false" />
-      <SettingsModal   v-if="showSettings"   @close="showSettings = false" />
+      <SettingsModal   v-if="showSettings"   :networkRef="networkRef" @close="showSettings = false" />
       <AdminPanel      v-if="showAdmin"      @close="showAdmin = false" />
     </template>
   </div>
