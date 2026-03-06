@@ -218,7 +218,7 @@ async function doAddSite() {
     <!-- 設定 -->
     <div style="padding-top:12px;display:flex;align-items:center;justify-content:space-between;">
       <button class="btn btn-sm btn-ghost" @click="emit('openSettings')" style="margin:0;">⚙️ 設定</button>
-      <span style="font-size:10px;color:#334155;font-family:'IBM Plex Mono',monospace;">v3.0</span>
+      <span style="font-size:10px;color:#334155;font-family:'IBM Plex Mono',monospace;">v3.1</span>
     </div>
   </aside>
 </template>
