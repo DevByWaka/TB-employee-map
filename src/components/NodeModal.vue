@@ -158,7 +158,7 @@ async function doDeleteNode() {
 
 <template>
   <Teleport to="body">
-    <div class="modal-bg app-root" @click.self="emit('close')">
+    <div class="modal-bg app-root" @click.self="!editMode && emit('close')">
       <div class="modal" style="max-width: 580px;">
         <div class="modal-header">
           <div class="modal-title">{{ title }}</div>

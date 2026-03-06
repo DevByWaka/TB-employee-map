@@ -35,7 +35,7 @@ async function save() {
 
 <template>
   <Teleport to="body">
-    <div class="modal-bg app-root" @click.self="emit('close')">
+    <div class="modal-bg app-root" @click.self="!editMode && emit('close')">
       <div class="modal">
         <div class="modal-header">
           <div class="modal-title">お客様情報</div>
