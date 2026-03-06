@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useEmployeeMapStore } from '@/stores/employeeMap'
+import { useEmployeeMapStore , getNodes, getEdges} from '@/stores/employeeMap'
 
 const store = useEmployeeMapStore()
 const props = defineProps({ edgeId: String })
@@ -11,13 +11,13 @@ const editSlots = ref([])
 
 const edge = computed(() => {
   store.edgeVersion
-  return props.edgeId ? store.getEdges()?.get(props.edgeId) : null
+  return props.edgeId ? getEdges()?.get(props.edgeId) : null
 })
 
 const edgeInfo = computed(() => {
   if (!edge.value) return ''
-  const from = store.getNodes()?.get(edge.value.from)?.label || '?'
-  const to   = store.getNodes()?.get(edge.value.to)?.label || '?'
+  const from = getNodes()?.get(edge.value.from)?.label || '?'
+  const to   = getNodes()?.get(edge.value.to)?.label || '?'
   const badge = edge.value.edgeType === 'manages'
     ? '<span style="font-size:11px;color:#22c55e;">（担当）</span>'
     : edge.value.assignmentType === 'support'
@@ -32,7 +32,7 @@ const validSlots = computed(() => (edge.value?.workingSlots || []).filter(s => s
 watch(() => props.edgeId, () => { editMode.value = false; editSlots.value = [] })
 
 function startEdit() {
-  const e = store.getEdges()?.get(props.edgeId)
+  const e = getEdges()?.get(props.edgeId)
   editSlots.value = e?.workingSlots?.length
     ? JSON.parse(JSON.stringify(e.workingSlots))
     : [{ days: [], startTime: '09:00', endTime: '18:00', memo: '' }]

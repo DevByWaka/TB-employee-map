@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
-import { useEmployeeMapStore } from '@/stores/employeeMap'
+import { useEmployeeMapStore , getNodes, getEdges} from '@/stores/employeeMap'
 
 const store = useEmployeeMapStore()
 const props = defineProps({ edgeId: String })
@@ -11,17 +11,17 @@ const form = reactive({ customerName: '', contactPerson: '', contactPhone: '', c
 
 const edge = computed(() => {
   store.edgeVersion
-  return props.edgeId ? store.getEdges()?.get(props.edgeId) : null
+  return props.edgeId ? getEdges()?.get(props.edgeId) : null
 })
 
 const info = computed(() => {
   if (!edge.value) return ''
-  return `${store.getNodes()?.get(edge.value.from)?.label || '?'} → ${store.getNodes()?.get(edge.value.to)?.label || '?'}`
+  return `${getNodes()?.get(edge.value.from)?.label || '?'} → ${getNodes()?.get(edge.value.to)?.label || '?'}`
 })
 
 watch(() => props.edgeId, id => {
   if (!id) return
-  const e = store.getEdges()?.get(id)
+  const e = getEdges()?.get(id)
   if (!e) return
   editMode.value = false
   Object.assign(form, { customerName: e.customerName || '', contactPerson: e.contactPerson || '', contactPhone: e.contactPhone || '', contactEmail: e.contactEmail || '', customerNotes: e.customerNotes || '' })

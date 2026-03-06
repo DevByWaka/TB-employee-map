@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useEmployeeMapStore } from '@/stores/employeeMap'
+import { useEmployeeMapStore , getNodes} from '@/stores/employeeMap'
 
 const store = useEmployeeMapStore()
 const emit = defineEmits(['close'])
@@ -8,7 +8,7 @@ const emit = defineEmits(['close'])
 const admins = ref([])
 const managers = computed(() => {
   store.nodeVersion
-  return store.getNodes()?.get({ filter: n => n.group === 'manager' }) || []
+  return getNodes()?.get({ filter: n => n.group === 'manager' }) || []
 })
 
 const newAdmin = reactive({ name: '', empId: '', password: '' })

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
-import { useEmployeeMapStore, calcAge, parsePhones } from '@/stores/employeeMap'
+import { useEmployeeMapStore, calcAge, parsePhones , getNodes, getEdges} from '@/stores/employeeMap'
 
 const store = useEmployeeMapStore()
 
@@ -17,12 +17,12 @@ const form = reactive({
 
 const node = computed(() => {
   store.nodeVersion
-  return props.nodeId ? store.getNodes()?.get(props.nodeId) : null
+  return props.nodeId ? getNodes()?.get(props.nodeId) : null
 })
 
 watch(() => props.nodeId, id => {
   if (!id) return
-  const n = store.getNodes()?.get(id)
+  const n = getNodes()?.get(id)
   if (!n) return
   editMode.value = false
   form.label = n.label
@@ -52,22 +52,22 @@ const canEdit = computed(() => store.canEdit(props.nodeId))
 const empHomeSites = computed(() => {
   store.edgeVersion
   if (!node.value || node.value.group !== 'employee') return []
-  return store.getEdges().get({ filter: e => e.from === props.nodeId && (e.assignmentType || 'home') === 'home' && !e.edgeType })
-    .map(e => ({ edgeId: e.id, label: store.getNodes().get(e.to)?.label || '?', slots: e.workingSlots || [] }))
+  return getEdges().get({ filter: e => e.from === props.nodeId && (e.assignmentType || 'home') === 'home' && !e.edgeType })
+    .map(e => ({ edgeId: e.id, label: getNodes().get(e.to)?.label || '?', slots: e.workingSlots || [] }))
 })
 const empSupportSites = computed(() => {
   store.edgeVersion
   if (!node.value || node.value.group !== 'employee') return []
-  return store.getEdges().get({ filter: e => e.from === props.nodeId && e.assignmentType === 'support' && !e.edgeType })
-    .map(e => ({ edgeId: e.id, label: store.getNodes().get(e.to)?.label || '?' }))
+  return getEdges().get({ filter: e => e.from === props.nodeId && e.assignmentType === 'support' && !e.edgeType })
+    .map(e => ({ edgeId: e.id, label: getNodes().get(e.to)?.label || '?' }))
 })
 const siteAssignments = computed(() => {
   store.edgeVersion; store.nodeVersion
   if (!node.value || node.value.group !== 'site') return []
-  return store.getEdges().get({ filter: e => e.to === props.nodeId && !e.edgeType })
+  return getEdges().get({ filter: e => e.to === props.nodeId && !e.edgeType })
     .sort((a, b) => ((a.assignmentType || 'home') === 'home' ? 0 : 1) - ((b.assignmentType || 'home') === 'home' ? 0 : 1))
     .map(e => {
-      const emp = store.getNodes().get(e.from) || {}
+      const emp = getNodes().get(e.from) || {}
       const age = calcAge(emp.birthdate)
       const info = [age !== null ? age + '歳' : null, emp.gender, emp.transport].filter(Boolean).join(' / ')
       return { edgeId: e.id, label: emp.label || '?', isHome: (e.assignmentType || 'home') === 'home', info }
@@ -76,13 +76,13 @@ const siteAssignments = computed(() => {
 const managerEmployees = computed(() => {
   store.edgeVersion; store.nodeVersion
   if (!node.value || node.value.group !== 'manager') return []
-  return store.getEdges().get({ filter: e => e.from === props.nodeId && e.edgeType === 'manages' })
+  return getEdges().get({ filter: e => e.from === props.nodeId && e.edgeType === 'manages' })
     .map(e => {
-      const emp = store.getNodes().get(e.to) || {}
+      const emp = getNodes().get(e.to) || {}
       const age = calcAge(emp.birthdate)
       const info = [age !== null ? age + '歳' : null, emp.gender, emp.transport].filter(Boolean).join(' / ')
-      const homeEdges = store.getEdges().get({ filter: e2 => e2.from === emp.id && (e2.assignmentType || 'home') === 'home' && !e2.edgeType })
-      const homeNames = homeEdges.map(e2 => store.getNodes().get(e2.to)?.label).filter(Boolean)
+      const homeEdges = getEdges().get({ filter: e2 => e2.from === emp.id && (e2.assignmentType || 'home') === 'home' && !e2.edgeType })
+      const homeNames = homeEdges.map(e2 => getNodes().get(e2.to)?.label).filter(Boolean)
       return { id: emp.id, label: emp.label || '?', info, homeNames }
     })
 })
@@ -90,11 +90,11 @@ const managerSites = computed(() => {
   store.edgeVersion; store.nodeVersion
   if (!node.value || node.value.group !== 'manager') return []
   const siteMap = {}
-  store.getEdges().get({ filter: e => e.from === props.nodeId && e.edgeType === 'manages' }).forEach(me => {
-    const emp = store.getNodes().get(me.to)
+  getEdges().get({ filter: e => e.from === props.nodeId && e.edgeType === 'manages' }).forEach(me => {
+    const emp = getNodes().get(me.to)
     if (!emp) return
-    store.getEdges().get({ filter: e2 => e2.from === emp.id && (e2.assignmentType || 'home') === 'home' && !e2.edgeType }).forEach(e2 => {
-      const site = store.getNodes().get(e2.to); if (site) siteMap[site.id] = site
+    getEdges().get({ filter: e2 => e2.from === emp.id && (e2.assignmentType || 'home') === 'home' && !e2.edgeType }).forEach(e2 => {
+      const site = getNodes().get(e2.to); if (site) siteMap[site.id] = site
     })
   })
   return Object.values(siteMap)
@@ -105,26 +105,26 @@ const managerSites = computed(() => {
 const editAssignments = computed(() => {
   store.edgeVersion
   if (!node.value || node.value.group !== 'employee') return []
-  return store.getEdges().get({ filter: e => e.from === props.nodeId && !e.edgeType })
-    .map(e => ({ edgeId: e.id, label: store.getNodes().get(e.to)?.label || '?', isHome: (e.assignmentType || 'home') === 'home' }))
+  return getEdges().get({ filter: e => e.from === props.nodeId && !e.edgeType })
+    .map(e => ({ edgeId: e.id, label: getNodes().get(e.to)?.label || '?', isHome: (e.assignmentType || 'home') === 'home' }))
 })
 const availableSites = computed(() => {
   store.edgeVersion; store.nodeVersion
   if (!node.value) return []
-  const connected = new Set(store.getEdges().get({ filter: e => e.from === props.nodeId && !e.edgeType }).map(e => e.to))
-  return store.getNodes().get({ filter: n => n.group === 'site' && !connected.has(n.id) })
+  const connected = new Set(getEdges().get({ filter: e => e.from === props.nodeId && !e.edgeType }).map(e => e.to))
+  return getNodes().get({ filter: n => n.group === 'site' && !connected.has(n.id) })
 })
 const editManagerEmps = computed(() => {
   store.edgeVersion
   if (!node.value || node.value.group !== 'manager') return []
-  return store.getEdges().get({ filter: e => e.from === props.nodeId && e.edgeType === 'manages' })
-    .map(e => ({ edgeId: e.id, label: store.getNodes().get(e.to)?.label || '?' }))
+  return getEdges().get({ filter: e => e.from === props.nodeId && e.edgeType === 'manages' })
+    .map(e => ({ edgeId: e.id, label: getNodes().get(e.to)?.label || '?' }))
 })
 const availableEmps = computed(() => {
   store.edgeVersion; store.nodeVersion
   if (!node.value) return []
-  const managed = new Set(store.getEdges().get({ filter: e => e.from === props.nodeId && e.edgeType === 'manages' }).map(e => e.to))
-  return store.getNodes().get({ filter: n => n.group === 'employee' && !managed.has(n.id) })
+  const managed = new Set(getEdges().get({ filter: e => e.from === props.nodeId && e.edgeType === 'manages' }).map(e => e.to))
+  return getNodes().get({ filter: n => n.group === 'employee' && !managed.has(n.id) })
 })
 
 // ── Actions ─────────────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ async function doAddManagerEmp() {
   form.addEmpId = ''
 }
 async function doDeleteNode() {
-  const n = store.getNodes().get(props.nodeId)
+  const n = getNodes().get(props.nodeId)
   if (!confirm(`「${n.label}」を削除しますか？\n関連する配置もすべて削除されます。`)) return
   await store.deleteNode(props.nodeId)
   emit('close')
