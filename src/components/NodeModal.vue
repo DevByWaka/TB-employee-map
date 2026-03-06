@@ -129,13 +129,12 @@ const availableEmps = computed(() => {
 
 // ── Actions ─────────────────────────────────────────────────────────────
 
-async function saveBasic() {
+async function save() {
   if (!form.label.trim()) { alert('名前を入力してください'); return }
   await store.saveNodeBasic(props.nodeId, form.label.trim(), form.employeeId.trim())
-  editMode.value = false
-}
-async function saveEmployee() {
-  await store.saveEmployeeInfo(props.nodeId, { birthdate: form.birthdate, gender: form.gender, transport: form.transport, phones: form.phones, email: form.email, notes: form.notes })
+  if (node.value.group === 'employee') {
+    await store.saveEmployeeInfo(props.nodeId, { birthdate: form.birthdate, gender: form.gender, transport: form.transport, phones: form.phones, email: form.email, notes: form.notes })
+  }
   editMode.value = false
 }
 async function doAddAssignment() {
@@ -259,8 +258,6 @@ async function doDeleteNode() {
             <div class="view-title">基本情報</div>
             <div class="form-group"><label class="label">名前</label><input class="input" v-model="form.label"></div>
             <div v-if="node.group !== 'site'" class="form-group"><label class="label">社員ID</label><input class="input" v-model="form.employeeId"></div>
-            <button class="btn btn-warn" @click="saveBasic">基本情報を変更</button>
-
             <!-- 従業員情報編集 -->
             <template v-if="node.group === 'employee'">
               <hr class="divider">
@@ -292,7 +289,7 @@ async function doDeleteNode() {
               </div>
               <div class="form-group"><label class="label">メール</label><input type="email" class="input" v-model="form.email"></div>
               <div class="form-group"><label class="label">メモ</label><textarea class="textarea" v-model="form.notes" style="min-height: 60px;"></textarea></div>
-              <button class="btn btn-warn" @click="saveEmployee">従業員情報を保存</button>
+
 
               <hr class="divider">
               <div class="view-title">配置の管理</div>
@@ -358,7 +355,8 @@ async function doDeleteNode() {
         </div>
 
         <div class="modal-footer">
-          <button v-if="editMode && store.isAdmin" class="btn btn-danger" @click="doDeleteNode" style="margin-right: auto;">🗑️ このノードを削除</button>
+          <button v-if="editMode && store.isAdmin" class="btn btn-danger" @click="doDeleteNode" style="margin-right: auto;">🗑️ 削除</button>
+          <button v-if="editMode" class="btn btn-warn" @click="save">💾 保存</button>
           <button class="btn btn-red" @click="emit('close')">閉じる</button>
         </div>
       </div>
