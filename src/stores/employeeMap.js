@@ -264,6 +264,35 @@ export const useEmployeeMapStore = defineStore('employeeMap', () => {
     const upd = { id: nodeId, label, title: prefix + label }
     if (node.group !== 'site') upd.employeeId = employeeId || null
     _nodes.update(upd); await dbUpsertNode(_nodes.get(nodeId))
+    // 関連エッジの title を再生成
+    await refreshEdgeTitles(nodeId, label)
+  }
+
+  async function refreshEdgeTitles(nodeId, newLabel) {
+    const related = _edges.get({ filter: e => e.from === nodeId || e.to === nodeId })
+    for (const e of related) {
+      const fromLabel = e.from === nodeId ? newLabel : (_nodes.get(e.from)?.label || '?')
+      const toLabel   = e.to   === nodeId ? newLabel : (_nodes.get(e.to)?.label   || '?')
+      let title = ''
+      if (e.edgeType === 'manages')      title = `${fromLabel} → ${toLabel}（担当）`
+      else if (e.edgeType === 'manager-site') title = `${fromLabel} → ${toLabel}（担当現場）`
+      else {
+        const typeLabel = (e.assignmentType || 'home') === 'home' ? '所属' : '応援'
+        title = `${fromLabel} → ${toLabel}（${typeLabel}）`
+        // スロット情報があれば付加
+        if (e.workingSlots?.length) {
+          e.workingSlots.forEach((s, i) => {
+            if (s.days?.length) {
+              title += `
+[${i+1}] ${s.days.join('・')} ${s.startTime}-${s.endTime}`
+              if (s.memo) title += ` (${s.memo})`
+            }
+          })
+        }
+      }
+      _edges.update({ id: e.id, title })
+      await dbUpsertEdge(_edges.get(e.id))
+    }
   }
   async function saveEmployeeInfo(nodeId, info) {
     const { birthdate, gender, transport, phones, email, notes } = info
